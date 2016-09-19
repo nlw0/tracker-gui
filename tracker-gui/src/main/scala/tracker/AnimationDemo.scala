@@ -11,7 +11,7 @@ import scalafx.scene.image.{ImageView, PixelFormat, WritableImage}
 import scalafx.scene.{Group, Scene}
 
 
-object ObjectTracker extends JFXApp {
+object AnimationDemo extends JFXApp {
   System.loadLibrary(Core.NATIVE_LIBRARY_NAME)
 
   val matOrig = Imgcodecs.imread(getClass.getResource("/grolsch.jpg").getPath)

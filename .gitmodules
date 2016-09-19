@@ -1,3 +1,4 @@
 [submodule "scalavision"]
 	path = scalavision
 	url = https://github.com/nlw0/scalavision
+	branch = master
