@@ -8,6 +8,7 @@ import scalafx.animation.AnimationTimer
 import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.scene.image.{ImageView, PixelFormat, WritableImage}
+import scalafx.scene.layout.BorderPane
 import scalafx.scene.{Group, Scene}
 
 object OpenCameraTest extends JFXApp {
@@ -17,6 +18,8 @@ object OpenCameraTest extends JFXApp {
 
   val capture = new VideoCapture(0)
 
+  capture.set(Videoio.CAP_PROP_MODE, Videoio.CAP_MODE_RGB)
+
   val w: Int = capture.get(Videoio.CAP_PROP_FRAME_WIDTH).toInt
   val h: Int = capture.get(Videoio.CAP_PROP_FRAME_HEIGHT).toInt
 
@@ -24,36 +27,45 @@ object OpenCameraTest extends JFXApp {
   val iv = new ImageView(wi)
   val rootPane = new Group
   rootPane.children = List(iv)
+
+  val was = Array.fill[Byte](h * w * 3)(0.toByte)
+  wi.pixelWriter.setPixels(0, 0, w, h, PixelFormat.getByteRgbInstance, was, 0, w)
+
+  def displayImage(mat: Mat): Unit = {
+    val CHANNELS = 3
+    val STRIDE = mat.cols * CHANNELS
+    val byteArray = new Array[Byte](mat.total().toInt * CHANNELS)
+    mat.get(0, 0, byteArray)
+    wi.pixelWriter.setPixels(0, 0, mat.cols, mat.rows, PixelFormat.getByteRgbInstance, byteArray, 0, STRIDE)
+  }
+
+  def processImage(matOrig: Mat) = {
+    Imgproc.circle(matOrig, new Point(10, 10), 3, new Scalar(255, 0, 0), -1)
+    matOrig
+  }
+
+  def captureImage(capture: VideoCapture) =
+    if (capture.isOpened) {
+      capture.read(matOrig)
+      if (!matOrig.empty()) Some(matOrig) else None
+    } else None
+
+  val frameFreq = new FrequencyMeter()
+
   stage = new PrimaryStage {
     title = "scalavision"
-    scene = new Scene(640, 480) {
+
+    scene = new Scene(w, h) {
       root = rootPane
 
-      var oi = 0L
-
       val timer = AnimationTimer { t =>
-        println(t - oi)
-        if (capture.isOpened()) {
+        frameFreq.update(t)
+        println(f"$frameFreq fps")
 
-          capture.read(matOrig)
-          if (!matOrig.empty()) {
-            val matrgb = new Mat()
-            Imgproc.cvtColor(matOrig, matrgb, Imgproc.COLOR_BGR2RGB)
-            Imgproc.circle(matrgb, new Point(10, 10), 3, new Scalar(255,0,0), -1)
-            val was = new Array[Byte](matOrig.total().toInt * matOrig.channels())
-            matrgb.get(0, 0, was)
-            pw.setPixels(0, 0, w, h, PixelFormat.getByteRgbInstance, was, 0, w * 3)
-          }
-        }
-        oi = t
+        captureImage(capture) map processImage foreach displayImage
       }
 
       timer.start
     }
   }
-
-  val pw = wi.pixelWriter
-
-  val was = Array.fill[Byte](640 * 480 * 3)(0.toByte)
-  pw.setPixels(0, 0, w, h, PixelFormat.getByteRgbInstance, was, 0, w)
 }
