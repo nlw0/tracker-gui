@@ -11,7 +11,7 @@ import scalafx.scene.image.{ImageView, PixelFormat, WritableImage}
 import scalafx.scene.layout.BorderPane
 import scalafx.scene.{Group, Scene}
 
-class WebcamProcessor(transformImage: Mat => Mat) {
+class WebcamProcessor(transformImage: Mat => Option[Mat]) {
 
   val capture = new VideoCapture(0)
 
@@ -23,7 +23,7 @@ class WebcamProcessor(transformImage: Mat => Mat) {
   def next = if (!capture.isOpened) None else {
     val cameraInput = new MatOfByte()
     capture.read(cameraInput)
-    if (cameraInput.empty()) None else Some(cameraInput) map transformImage
+    if (cameraInput.empty()) None else Some(cameraInput) flatMap transformImage
   }
 }
 
@@ -32,7 +32,8 @@ object InteractiveTracker extends JFXApp {
 
   val frameFreq = new FrequencyMeter()
 
-  val webcam = new WebcamProcessor(TestKeypointExtractor.findAndDrawFeatures)
+  // val webcam = new WebcamProcessor(TestKeypointExtractor.findAndDrawFeatures)
+  val webcam = new WebcamProcessor(Tracker.track)
 
   val imagePane = new Group
   val wi = new WritableImage(webcam.w, webcam.h)
@@ -66,4 +67,15 @@ object InteractiveTracker extends JFXApp {
     wi.pixelWriter.setPixels(0, 0, mat.cols, mat.rows, PixelFormat.getByteRgbInstance, byteArray, 0, STRIDE)
   }
 
+}
+
+object Tracker {
+  var lastImage: Option[Mat] = None
+
+  def track(image: Mat) = {
+    val out = lastImage map (li => TestKeypointExtractor.findAndDrawTracks(li, image))
+
+    lastImage = Some(image)
+    out
+  }
 }
