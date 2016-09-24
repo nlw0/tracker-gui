@@ -2,7 +2,7 @@ package tracker
 
 import org.opencv.core._
 import org.opencv.videoio.{VideoCapture, Videoio}
-import visionlib.TestKeypointExtractor
+import visionlib.{ExtractedKeypoints, ImageAndDescriptors, TestKeypointExtractor, Tracker}
 
 import scalafx.animation.AnimationTimer
 import scalafx.application.JFXApp
@@ -11,7 +11,7 @@ import scalafx.scene.image.{ImageView, PixelFormat, WritableImage}
 import scalafx.scene.layout.BorderPane
 import scalafx.scene.{Group, Scene}
 
-class WebcamProcessor(transformImage: Mat => Option[Mat]) {
+object WebcamStream extends Iterator[Option[Mat]] {
 
   val capture = new VideoCapture(0)
 
@@ -20,10 +20,12 @@ class WebcamProcessor(transformImage: Mat => Option[Mat]) {
   val w: Int = capture.get(Videoio.CAP_PROP_FRAME_WIDTH).toInt
   val h: Int = capture.get(Videoio.CAP_PROP_FRAME_HEIGHT).toInt
 
+  def hasNext = true
+
   def next = if (!capture.isOpened) None else {
     val cameraInput = new MatOfByte()
     capture.read(cameraInput)
-    if (cameraInput.empty()) None else Some(cameraInput) flatMap transformImage
+    if (cameraInput.empty()) None else Some(cameraInput)
   }
 }
 
@@ -32,14 +34,12 @@ object InteractiveTracker extends JFXApp {
 
   val frameFreq = new FrequencyMeter()
 
-  // val webcam = new WebcamProcessor(TestKeypointExtractor.findAndDrawFeatures)
-  val webcam = new WebcamProcessor(Tracker.track)
+  val imgPairs = WebcamStream.flatten map TestKeypointExtractor.extractFeatures sliding 2
 
   val imagePane = new Group
-  val wi = new WritableImage(webcam.w, webcam.h)
+  val wi = new WritableImage(WebcamStream.w, WebcamStream.h)
   val iv = new ImageView(wi)
   imagePane.children = List(iv)
-
 
   stage = new PrimaryStage {
     title = "scalavision"
@@ -56,7 +56,8 @@ object InteractiveTracker extends JFXApp {
 
   def nextFrame(t: Long): Unit = {
     println(f"${frameFreq.update(t)} fps")
-    webcam.next foreach displayImage
+    val ii = imgPairs.next
+    Tracker.track(ii(0), ii(1)) foreach displayImage
   }
 
   def displayImage(mat: Mat): Unit = {
@@ -69,13 +70,5 @@ object InteractiveTracker extends JFXApp {
 
 }
 
-object Tracker {
-  var lastImage: Option[Mat] = None
 
-  def track(image: Mat) = {
-    val out = lastImage map (li => TestKeypointExtractor.findAndDrawTracks(li, image))
 
-    lastImage = Some(image)
-    out
-  }
-}
