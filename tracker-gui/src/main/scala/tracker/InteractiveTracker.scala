@@ -69,6 +69,3 @@ object InteractiveTracker extends JFXApp {
   }
 
 }
-
-
-
