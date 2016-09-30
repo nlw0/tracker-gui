@@ -11,23 +11,6 @@ import scalafx.scene.image.{ImageView, PixelFormat, WritableImage}
 import scalafx.scene.layout.BorderPane
 import scalafx.scene.{Group, Scene}
 
-object WebcamStream extends Iterator[Option[Mat]] {
-
-  val capture = new VideoCapture(0)
-
-  capture.set(Videoio.CAP_PROP_MODE, Videoio.CAP_MODE_RGB)
-
-  val w: Int = capture.get(Videoio.CAP_PROP_FRAME_WIDTH).toInt
-  val h: Int = capture.get(Videoio.CAP_PROP_FRAME_HEIGHT).toInt
-
-  def hasNext = true
-
-  def next = if (!capture.isOpened) None else {
-    val cameraInput = new MatOfByte()
-    capture.read(cameraInput)
-    if (cameraInput.empty()) None else Some(cameraInput)
-  }
-}
 
 object InteractiveTracker extends JFXApp {
   System.loadLibrary(Core.NATIVE_LIBRARY_NAME)
