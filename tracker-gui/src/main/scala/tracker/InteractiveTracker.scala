@@ -39,8 +39,7 @@ object InteractiveTracker extends JFXApp {
 
   def nextFrame(t: Long): Unit = {
     println(f"${frameFreq.update(t)} fps")
-    val ii = imgPairs.next
-    Tracker.track(ii(0), ii(1)) foreach displayImage
+    Tracker.track(imgPairs.next: _*) foreach displayImage
   }
 
   def displayImage(mat: Mat): Unit = {
