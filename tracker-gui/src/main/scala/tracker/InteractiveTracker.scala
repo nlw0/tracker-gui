@@ -12,12 +12,12 @@ import scalafx.scene.layout.BorderPane
 import scalafx.scene.{Group, Scene}
 
 
-object InteractiveTracker extends JFXApp {
+object InteractiveTracker extends JFXApp with TestKeypointExtractor {
   System.loadLibrary(Core.NATIVE_LIBRARY_NAME)
 
   val frameFreq = new FrequencyMeter()
 
-  val imgPairs = WebcamStream.flatten map TestKeypointExtractor.extractFeatures sliding 2
+  val imgPairs = WebcamStream.flatten map extractFeatures sliding 2
 
   val imagePane = new Group
   val wi = new WritableImage(WebcamStream.w, WebcamStream.h)

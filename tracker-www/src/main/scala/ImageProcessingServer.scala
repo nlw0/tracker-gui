@@ -12,7 +12,7 @@ import visionlib.{Tracker, TestKeypointExtractor}
 import scala.concurrent.{ExecutionContextExecutor, Future}
 
 
-trait ImageProcessingServer {
+trait ImageProcessingServer extends TestKeypointExtractor {
 
   implicit val system: ActorSystem
 
@@ -32,11 +32,11 @@ trait ImageProcessingServer {
         val imageAfilename = "/home/nlw/buska.jpg"
         val imageBfilename = "/home/nlw/buska.jpg"
 
-        val imgA = TestKeypointExtractor.openImage(imageAfilename)
-        val imgB = TestKeypointExtractor.openImage(imageBfilename)
-        val mkp = TestKeypointExtractor.findKeypointMatches(imgA, imgB)
-        //val img = TestKeypointExtractor.drawCorrespondences(imgA, imgB, mkp)
-        val img = TestKeypointExtractor.drawTracksBoth(imgA, imgB, mkp)
+        val imgA = openImage(imageAfilename)
+        val imgB = openImage(imageBfilename)
+        val mkp = findKeypointMatches(imgA, imgB)
+        //val img = drawCorrespondences(imgA, imgB, mkp)
+        val img = drawTracksBoth(imgA, imgB, mkp)
         val yowza = new MatOfByte
 
         Imgcodecs.imencode(".jpg", img, yowza)
