@@ -7,7 +7,7 @@ import akka.stream.Materializer
 import akka.util.ByteString
 import org.opencv.core.{Mat, MatOfByte}
 import org.opencv.imgcodecs.Imgcodecs
-import visionlib.{Tracker, TestKeypointExtractor}
+import visionlib.{TestKeypointExtractor, Tracker}
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 
@@ -32,8 +32,8 @@ trait ImageProcessingServer extends TestKeypointExtractor {
         val imageAfilename = "/home/nlw/buska.jpg"
         val imageBfilename = "/home/nlw/buska.jpg"
 
-        val imgA = openImage(imageAfilename)
-        val imgB = openImage(imageBfilename)
+        val imgA = loadImageGrayscale(imageAfilename)
+        val imgB = loadImageGrayscale(imageBfilename)
         val mkp = findKeypointMatches(imgA, imgB)
         //val img = drawCorrespondences(imgA, imgB, mkp)
         val img = drawTracksBoth(imgA, imgB, mkp)
