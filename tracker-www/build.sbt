@@ -2,7 +2,7 @@ name := "tracker-www"
 
 version := "1.0"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.1"
 
 val akkaVersion = "2.4.10"
 

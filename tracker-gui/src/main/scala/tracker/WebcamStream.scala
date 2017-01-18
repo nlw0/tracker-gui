@@ -17,6 +17,8 @@ object WebcamStream extends Iterator[Option[Mat]] {
   def next = if (!capture.isOpened) None else {
     val cameraInput = new MatOfByte()
     capture.read(cameraInput)
-    if (cameraInput.empty()) None else Some(cameraInput)
+    if (cameraInput.empty()) None else {
+      Some(cameraInput)
+    }
   }
 }
