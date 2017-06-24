@@ -2,6 +2,7 @@ package tracker
 
 import org.opencv.core.{Mat, MatOfByte}
 import org.opencv.videoio.{VideoCapture, Videoio}
+import org.opencv.imgproc.Imgproc
 
 object WebcamStream extends Iterator[Option[Mat]] {
 
@@ -18,7 +19,9 @@ object WebcamStream extends Iterator[Option[Mat]] {
     val cameraInput = new MatOfByte()
     capture.read(cameraInput)
     if (cameraInput.empty()) None else {
-      Some(cameraInput)
+      val matrgb = new Mat()
+      Imgproc.cvtColor(cameraInput, matrgb, Imgproc.COLOR_BGR2RGB)
+      Some(matrgb)
     }
   }
 }
