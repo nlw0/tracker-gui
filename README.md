@@ -7,4 +7,4 @@ We use AKAZE features, do some very basic and traditional matching, estimate tra
   - Stitching images to create panoramas.
   - Extract texture from flat object or labels. "Scan" photographs and documents.
 
-[[https://github.com/nlw0/tracker-gui/blob/master/scalavision_demo.png|alt=Matched features and estimated translation.]]
+![screenshot](scalavision_demo.png?raw=true "Matched features and estimated translation")
